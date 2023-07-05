@@ -14,10 +14,11 @@ namespace SV {
             connection accept();
             void close();
         private:
-            address addr;
+            std::string connection_type;
+            address local_addr;
             #if defined(WIN)
             #elif defined(UNIX)
-                listener(int sock, address local_addr);
+                listener(int socket, std::string connection_type, address local_addr);
                 int socket;
             #endif
     };

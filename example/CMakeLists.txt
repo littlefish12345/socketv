@@ -1,1 +1,2 @@
-add_subdirectory("dev_test")
+add_subdirectory("tcp_server")
+add_subdirectory("tcp_client")

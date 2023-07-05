@@ -30,7 +30,7 @@ namespace SV {
 
             void close();
         private:
-            address addr;
+            address remote_addr;
             #if defined(WIN)
             #elif defined(UNIX)
                 connection(int socket, address remote_addr);

@@ -19,7 +19,7 @@ address::address() {
 
 }
 
-address::address(std::string ip_type_str, std::string ip_str, unsigned short port_num) {
+address::address(std::string ip_type_str, std::string ip_str, unsigned short port): ip_str(ip_str), port(port) {
     if (ip_type_str == "ipv4") {
         ip_type = 4;
         if (ip_str == "") {
@@ -41,36 +41,30 @@ address::address(std::string ip_type_str, std::string ip_str, unsigned short por
     } else {
         throw std::string("ip type invalid");
     }
-    ip_string = ip_str;
-    port = port_num;
 }
 
-address::address(in_addr ipv4_addr_internal, unsigned short port_num) {
+address::address(in_addr ipv4_addr, unsigned short port): ipv4_addr(ipv4_addr), port(port) {
     ip_type = 4;
-    ipv4_addr = ipv4_addr_internal;
-    port = port_num;
     char buffer[INET_ADDRSTRLEN];
-    const char *ptr = inet_ntop(AF_INET, &ipv4_addr_internal, buffer, sizeof(buffer));
+    const char *ptr = inet_ntop(AF_INET, &ipv4_addr, buffer, sizeof(buffer));
     if (ptr == NULL) {
         throw std::string("internal ipv4 struct invalid: [Errno ") + std::to_string(errno) + std::string("] ") +  std::string(::strerror(errno));
     }
-    ip_string = std::string(ptr);
+    ip_str = std::string(ptr);
 }
 
-address::address(in6_addr ipv6_addr_internal, unsigned short port_num) {
+address::address(in6_addr ipv6_addr, unsigned short port): ipv6_addr(ipv6_addr), port(port) {
     ip_type = 6;
-    ipv6_addr = ipv6_addr_internal;
-    port = port_num;
     char buffer[INET6_ADDRSTRLEN];
-    const char *ptr = inet_ntop(AF_INET6, &ipv6_addr_internal, buffer, sizeof(buffer));
+    const char *ptr = inet_ntop(AF_INET6, &ipv6_addr, buffer, sizeof(buffer));
     if (ptr == NULL) {
         throw std::string("internal ipv4 struct invalid: [Errno ") + std::to_string(errno) + std::string("] ") +  std::string(::strerror(errno));
     }
-    ip_string = std::string(ptr);
+    ip_str = std::string(ptr);
 }
 
 std::string address::get_ip_string() {
-    return ip_string;
+    return ip_str;
 }
 
 unsigned short address::get_port() {

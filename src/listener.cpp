@@ -19,15 +19,14 @@ listener::listener() {
 
 }
 
-listener::listener(int sock, address local_addr) {
-    socket = sock;
-    addr = local_addr;
+listener::listener(int socket, std::string connection_type, address local_addr): socket(socket), connection_type(connection_type), local_addr(local_addr) {
+    
 }
 
 connection listener::accept() {
     address remote_addr;
     int conn;
-    if (addr.ip_type == 4) {
+    if (local_addr.ip_type == 4) {
         sockaddr_in addr;
         socklen_t addr_len = sizeof(addr);
         conn = ::accept(socket, (sockaddr *)&addr, &addr_len);
@@ -35,7 +34,7 @@ connection listener::accept() {
             throw std::string("accept failed: [Errno ") + std::to_string(errno) + std::string("] ") + std::string(::strerror(errno));
         }
         remote_addr = address(addr.sin_addr, addr.sin_port);
-    } else if (addr.ip_type == 6) {
+    } else if (local_addr.ip_type == 6) {
         sockaddr_in6 addr;
         socklen_t addr_len = sizeof(addr);
         conn = ::accept(socket, (sockaddr *)&addr, &addr_len);

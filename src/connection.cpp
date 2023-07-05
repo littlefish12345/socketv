@@ -20,13 +20,12 @@ connection::connection() {
 
 }
 
-connection::connection(int conn, address remote_addr) {
-    socket = conn;
-    addr = remote_addr;
+connection::connection(int socket, address remote_addr): socket(socket), remote_addr(remote_addr) {
+
 }
 
 address connection::get_remote_addr() {
-    return addr;
+    return remote_addr;
 }
 
 inline void connection::send(unsigned char *data, size_t length, bool block) {
