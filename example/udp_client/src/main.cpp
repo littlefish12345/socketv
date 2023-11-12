@@ -12,44 +12,40 @@ int main() {
         printf("%s\n", e.c_str());
         return 0;
     }
+
     SV::socketv sv;
     SV::sender conn;
-    SV::listener listener;
-
-    sv.set_backlog(10);
-
+    SV::address remote_addr = SV::address(SV::ipv4, "127.0.0.1", 11451);
     try {
-        listener = sv.listen(SV::tcp, SV::address(SV::ipv6, "::1", 11451));
+        conn = sv.connect(SV::ipv4);
     } catch(SV::exception e) {
         printf("%s\n", e.what());
-        listener.close();
+        conn.close();
         return 0;
     }
-
+        
     char buffer[BUFFER_SIZE];
     unsigned int size;
-
     try {
-        conn = listener.accept();
-        printf("%s:%hu\n", conn.get_remote_addr().get_ip_str(), conn.get_remote_addr().get_port());
-        printf("%s:%hu\n", conn.get_local_addr().get_ip_str(), conn.get_local_addr().get_port());
         while (true) {
-            size = conn.recv(buffer, BUFFER_SIZE-1);
-            buffer[size] = 0;
-            printf("%s\n", buffer);
+            scanf("%s", &buffer);
+            size = strlen(buffer);
+            conn.sendto(remote_addr, buffer, size);
+            printf("%s:%hu\n", remote_addr.get_ip_str(), remote_addr.get_port());
+            printf("%s:%hu\n", conn.get_local_addr().get_ip_str(), conn.get_local_addr().get_port());
             if (std::string(buffer) == "exit") {
                 conn.close();
                 break;
             }
-            conn.send(buffer, size);
+            size = conn.recvfrom(&remote_addr, buffer, BUFFER_SIZE-1);
+            buffer[size] = 0;
+            printf("%s\n", buffer);
         }
-    } catch(SV::exception e) {
+    } catch(SV::exception e)  {
         printf("%s\n", e.what());
         conn.close();
-        listener.close();
         return 0;
     }
-    
-    listener.close();
+    conn.close();
     return 0;
 }
