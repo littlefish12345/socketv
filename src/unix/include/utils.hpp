@@ -2,8 +2,10 @@
 
 #include <socketv.hpp>
 
+#include <cstring>
 #include <string>
-#include <ws2tcpip.h>
+#include <cerrno>
+#include <netinet/in.h>
 
 namespace SV {
     inline int ip_type_to_af_int(IPType ip_type) {
@@ -33,19 +35,7 @@ namespace SV {
         return -1;
     }
 
-    inline std::string get_last_wsa_error_message() {
-        int err_code = WSAGetLastError();
-        char *err_message = NULL;
-
-        int result = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err_code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&err_message, 0, NULL);
-
-        if (result == 0) {
-            return "";
-        }
-
-        std::string err_std_str = err_message;
-        LocalFree(err_message);
-
-        return err_std_str;
+    inline std::string get_last_error_message() {
+        return std::string(::strerror(errno));
     }
 }

@@ -3,7 +3,7 @@
 #include <string>
 #include <socketv.hpp>
 
-#define BUFFER_SIZE 8192
+#define BUFFER_SIZE 32768
 
 int main() {
     try {

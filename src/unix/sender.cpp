@@ -2,7 +2,11 @@
 #include <utils.hpp>
 
 #include <string>
-#include <ws2tcpip.h>
+#include <cstring>
+#include <cerrno>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 namespace SV {
     int sender::send(const char *data, int length) {
@@ -16,14 +20,13 @@ namespace SV {
         int single_sended;
         while (all_sended < length) {
             single_sended = ::send(socket, &data[all_sended], length - all_sended, 0);
-            if (single_sended < 0) {
-                if (WSAGetLastError() == WSAECONNRESET) {
-                    close();
-                }
-                throw exception("SV::sender::send", "send error", WSAGetLastError(), get_last_error_message());
+            if (single_sended <= 0) {
+                close();
+                throw exception("SV::sender::send", "send error", errno, get_last_error_message());
             }
             all_sended += single_sended;
         }
+        printf("%d ", all_sended);
         return all_sended;
     }
 
@@ -35,11 +38,9 @@ namespace SV {
             throw exception("SV::sender::recv", "socket closed", 0, "");
         }
         int recv_size = ::recv(socket, buffer, buffer_size, 0);
-        if (recv_size < 0) {
-            if (WSAGetLastError() == WSAECONNRESET) {
-                close();
-            }
-            throw exception("SV::sender::recv", "recv error", WSAGetLastError(), get_last_error_message());
+        if (recv_size <= 0) {
+            close();
+            throw exception("SV::sender::recv", "recv error", errno, get_last_error_message());
         }
         return recv_size;
     }
@@ -68,19 +69,19 @@ namespace SV {
             sin.sin6_port = ::htons(addr.address_port);
             sended_size = ::sendto(socket, data, length, 0, (sockaddr *)&sin, sizeof(sin));
         }
-        if (sended_size == SOCKET_ERROR) {
-            throw exception("SV::sender::sendto", "sendto error", WSAGetLastError(), get_last_error_message());
+        if (sended_size == -1) {
+            throw exception("SV::sender::sendto", "sendto error", errno, get_last_error_message());
         }
         if (!have_local_addr) {
             if (local_addr.address_ip_type == ipv4) {
                 sockaddr_in sin;
-                int size = sizeof(sin);
+                socklen_t size = sizeof(sin);
                 ::getsockname(socket, (sockaddr *)&sin, &size);
                 ::inet_ntop(AF_INET, &sin.sin_addr, local_addr.address_ip_str, sizeof(local_addr.address_ip_str));
                 local_addr.address_port = ::ntohs(sin.sin_port);
             } else if (local_addr.address_ip_type == ipv6) {
                 sockaddr_in6 sin;
-                int size = sizeof(sin);
+                socklen_t size = sizeof(sin);
                 ::getsockname(socket, (sockaddr *)&sin, &size);
                 ::inet_ntop(AF_INET6, &sin.sin6_addr, local_addr.address_ip_str, sizeof(local_addr.address_ip_str));
                 local_addr.address_port = ::ntohs(sin.sin6_port);
@@ -97,14 +98,14 @@ namespace SV {
         if (!open) {
             throw exception("SV::sender::sendto", "socket closed", 0, "");
         }
-        int addr_len;
+        socklen_t addr_len;
         int recv_size;
         if (local_addr.address_ip_type == ipv4) {
             sockaddr_in remote_sin;
             addr_len = sizeof(remote_sin);
             recv_size = ::recvfrom(socket, buffer, buffer_size, 0, (sockaddr *)&remote_sin, &addr_len);
-            if (recv_size == SOCKET_ERROR) {
-                throw exception("SV::sender::recvfrom", "recvfrom error", WSAGetLastError(), get_last_error_message());
+            if (recv_size == -1) {
+                throw exception("SV::sender::recvfrom", "recvfrom error", errno, get_last_error_message());
             }
             addr->address_ip_type = ipv4;
             *((in_addr *)&addr->address_ipv4_addr) = remote_sin.sin_addr;
@@ -114,8 +115,8 @@ namespace SV {
             sockaddr_in6 remote_sin;
             addr_len = sizeof(remote_sin);
             recv_size = ::recvfrom(socket, buffer, buffer_size, 0, (sockaddr *)&remote_sin, &addr_len);
-            if (recv_size == SOCKET_ERROR) {
-                throw exception("SV::sender::recvfrom", "recvfrom error", WSAGetLastError(), get_last_error_message());
+            if (recv_size == -1) {
+                throw exception("SV::sender::recvfrom", "recvfrom error", errno, get_last_error_message());
             }
             addr->address_ip_type = ipv6;
             *((in6_addr *)&addr->address_ipv6_addr) = remote_sin.sin6_addr;
@@ -129,7 +130,7 @@ namespace SV {
         if (!open) {
             return;
         }
-        ::closesocket(socket);
+        ::close(socket);
         open = false;
     }
 

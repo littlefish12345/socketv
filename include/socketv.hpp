@@ -2,6 +2,7 @@
 
 #include <string>
 #include <exception>
+#include <cstring>
 
 namespace SV {
     #define SOCKETV_DEFAULT_BACKLOG 10
@@ -26,7 +27,10 @@ namespace SV {
             exception(std::string func_call, std::string func_message, int error_code, std::string system_message) : func_call(func_call), func_message(func_message), error_code(error_code), system_message(system_message) {}
             virtual const char *what() const noexcept override {
                 std::string s = (func_call + " " + func_message + (error_code == 0 ? "" : ": [Errno " + std::to_string(error_code) + (system_message == "" ? "]" : "] " + system_message)));
-                return s.c_str();
+                char *str = (char *)malloc(s.size() +1);
+                memcpy(str, s.c_str(), s.size());
+                str[s.size()] = '\0';
+                return str;
             }
     };
 

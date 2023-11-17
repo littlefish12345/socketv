@@ -3,7 +3,10 @@
 
 #include <string>
 #include <cstring>
-#include <ws2tcpip.h>
+#include <cerrno>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 namespace SV {
     sender listener::accept() {
@@ -20,19 +23,19 @@ namespace SV {
         remote_addr.address_ip_type = local_addr.address_ip_type;
         if (local_addr.address_ip_type == ipv4) {
             sockaddr_in remote_sin;
-            int addr_len = sizeof(remote_sin);
-            c.socket = ::accept(socket, (SOCKADDR *)&remote_sin, &addr_len);
-            if (c.socket == INVALID_SOCKET) {
-                throw exception("SV::listener::accept", "accept error", WSAGetLastError(), get_last_error_message());
+            socklen_t addr_len = sizeof(remote_sin);
+            c.socket = ::accept(socket, (sockaddr *)&remote_sin, &addr_len);
+            if (c.socket == -1) {
+                throw exception("SV::listener::accept", "accept error", errno, get_last_error_message());
             }
             ::inet_ntop(AF_INET, &remote_sin.sin_addr, remote_addr.address_ip_str, sizeof(remote_addr.address_ip_str));
             remote_addr.address_port = ::ntohs(remote_sin.sin_port);
         } else if (local_addr.address_ip_type == ipv6) {
             sockaddr_in6 remote_sin;
-            int addr_len = sizeof(remote_sin);
-            c.socket = ::accept(socket, (SOCKADDR *)&remote_sin, &addr_len);
-            if (c.socket == INVALID_SOCKET) {
-                throw exception("SV::listener::accept", "accept error", WSAGetLastError(), get_last_error_message());
+            socklen_t addr_len = sizeof(remote_sin);
+            c.socket = ::accept(socket, (sockaddr *)&remote_sin, &addr_len);
+            if (c.socket == -1) {
+                throw exception("SV::listener::accept", "accept error", errno, get_last_error_message());
             }
             ::inet_ntop(AF_INET6, &remote_sin.sin6_addr, remote_addr.address_ip_str, sizeof(remote_addr.address_ip_str));
             remote_addr.address_port = ::ntohs(remote_sin.sin6_port);
@@ -68,8 +71,8 @@ namespace SV {
             sin.sin6_port = ::htons(addr.address_port);
             sended_size = ::sendto(socket, data, length, 0, (sockaddr *)&sin, sizeof(sin));
         }
-        if (sended_size == SOCKET_ERROR) {
-            throw exception("SV::listener::sendto", "sendto error", WSAGetLastError(), get_last_error_message());
+        if (sended_size == -1) {
+            throw exception("SV::listener::sendto", "sendto error", errno, get_last_error_message());
         }
         return sended_size;
     }
@@ -81,14 +84,14 @@ namespace SV {
         if (!open) {
             throw exception("SV::listener::sendto", "socket closed", 0, "");
         }
-        int addr_len;
+        socklen_t addr_len;
         int recv_size;
         if (local_addr.address_ip_type == ipv4) {
             sockaddr_in remote_sin;
             addr_len = sizeof(remote_sin);
             recv_size = ::recvfrom(socket, buffer, buffer_size, 0, (sockaddr *)&remote_sin, &addr_len);
-            if (recv_size == SOCKET_ERROR) {
-                throw exception("SV::listener::recvfrom", "recvfrom error", WSAGetLastError(), get_last_error_message());
+            if (recv_size == -1) {
+                throw exception("SV::listener::recvfrom", "recvfrom error", errno, get_last_error_message());
             }
             addr->address_ip_type = ipv4;
             *((in_addr *)&addr->address_ipv4_addr) = remote_sin.sin_addr;
@@ -98,8 +101,8 @@ namespace SV {
             sockaddr_in6 remote_sin;
             addr_len = sizeof(remote_sin);
             recv_size = ::recvfrom(socket, buffer, buffer_size, 0, (sockaddr *)&remote_sin, &addr_len);
-            if (recv_size == SOCKET_ERROR) {
-                throw exception("SV::listener::recvfrom", "recvfrom error", WSAGetLastError(), get_last_error_message());
+            if (recv_size == -1) {
+                throw exception("SV::listener::recvfrom", "recvfrom error", errno, get_last_error_message());
             }
             addr->address_ip_type = ipv6;
             *((in6_addr *)&addr->address_ipv6_addr) = remote_sin.sin6_addr;
@@ -113,7 +116,7 @@ namespace SV {
         if (!open) {
             return;
         }
-        ::closesocket(socket);
+        ::close(socket);
         open = true;
     }
 
