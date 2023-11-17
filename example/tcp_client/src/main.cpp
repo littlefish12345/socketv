@@ -14,7 +14,7 @@ int main() {
     }
 
     SV::socketv sv;
-    SV::sender conn;
+    SV::connector conn;
     try {
         conn = sv.connect(SV::tcp, SV::address(SV::ipv6, "::1", 11451));
     } catch(SV::exception e) {

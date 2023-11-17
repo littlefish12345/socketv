@@ -15,12 +15,12 @@
 #endif
 
 namespace SV {
-    sender listener::accept() {
+    connector listener::accept() {
         if (!open) {
             throw exception("SV::listener::accept", "socket closed", 0, "");
         }
     
-        sender c;
+        connector c;
         c.open = false;
         c.have_local_addr = true;
         c.local_addr = local_addr;

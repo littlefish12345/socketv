@@ -14,7 +14,7 @@ int main() {
     }
 
     SV::socketv sv;
-    SV::sender conn;
+    SV::connector conn;
     SV::address remote_addr = SV::address(SV::ipv6, "::1", 11451);
     try {
         conn = sv.connect(SV::ipv6);

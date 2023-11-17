@@ -13,7 +13,7 @@ int main() {
         return 0;
     }
     SV::socketv sv;
-    SV::sender conn;
+    SV::connector conn;
     SV::listener listener;
 
     sv.set_backlog(10);

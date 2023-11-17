@@ -37,7 +37,7 @@ namespace SV {
     class address {
         friend class socketv;
         friend class listener;
-        friend class sender;
+        friend class connector;
         public:
             address();
             address(IPType ip_type, const char *ip_str, unsigned short port);
@@ -53,7 +53,7 @@ namespace SV {
             unsigned short address_port;
     };
 
-    class sender {
+    class connector {
         friend class socketv;
         friend class listener;
         public:
@@ -76,7 +76,7 @@ namespace SV {
     class listener {
         friend class socketv;
         public:
-            sender accept();
+            connector accept();
             int sendto(address addr, char *data, int length);
             int recvfrom(address *addr, char *buffer, int buffer_size);
             void close();
@@ -94,10 +94,10 @@ namespace SV {
             void set_backlog(int new_backlog);
 
             listener listen(ConnType connection_type, address addr);
-            sender connect(ConnType connection_type, address local_addr, address remote_addr);
-            sender connect(ConnType connection_type, address remote_addr);
-            sender connect(address local_addr); //only for udp
-            sender connect(IPType ip_type); //only for udp
+            connector connect(ConnType connection_type, address local_addr, address remote_addr);
+            connector connect(ConnType connection_type, address remote_addr);
+            connector connect(address local_addr); //only for udp
+            connector connect(IPType ip_type); //only for udp
 
         private:
             int backlog;

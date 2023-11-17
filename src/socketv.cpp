@@ -63,12 +63,12 @@ namespace SV {
         return l;
     }
 
-    sender socketv::connect(ConnType connection_type, address local_addr, address remote_addr) {
+    connector socketv::connect(ConnType connection_type, address local_addr, address remote_addr) {
         if (local_addr.address_ip_type != remote_addr.address_ip_type) {
             throw exception("SV::connect", "ip type mismatch", 0, "");
         }
 
-        sender c;
+        connector c;
         c.open = false;
         c.have_local_addr = true;
         c.remote_addr = remote_addr;
@@ -136,8 +136,8 @@ namespace SV {
         return c;
     }
 
-    sender socketv::connect(ConnType connection_type, address remote_addr) {
-        sender c;
+    connector socketv::connect(ConnType connection_type, address remote_addr) {
+        connector c;
         c.open = false;
         c.have_local_addr = true;
         c.remote_addr = remote_addr;
@@ -187,8 +187,8 @@ namespace SV {
         return c;
     }
 
-    sender socketv::connect(address local_addr) {
-        sender c;
+    connector socketv::connect(address local_addr) {
+        connector c;
         c.open = false;
         c.have_local_addr = true;
         c.connection_conn_type = udp;
@@ -235,8 +235,8 @@ namespace SV {
         return c;
     }
 
-    sender socketv::connect(IPType ip_type) {
-        sender c;
+    connector socketv::connect(IPType ip_type) {
+        connector c;
         c.open = false;
         c.have_local_addr = false;
         c.connection_conn_type = udp;
