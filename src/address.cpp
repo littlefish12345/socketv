@@ -3,10 +3,16 @@
 
 #include <string>
 #include <cstring>
-#include <cerrno>
+
+#if defined(WINDOWS)
+
+#include <ws2tcpip.h>
+
+#elif defined (UNIX)
+
 #include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
+
+#endif
 
 namespace SV {
     address::address() {

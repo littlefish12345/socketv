@@ -15,9 +15,9 @@ int main() {
 
     SV::socketv sv;
     SV::sender conn;
-    SV::address remote_addr = SV::address(SV::ipv4, "127.0.0.1", 11451);
+    SV::address remote_addr = SV::address(SV::ipv6, "::1", 11451);
     try {
-        conn = sv.connect(SV::ipv4);
+        conn = sv.connect(SV::ipv6);
     } catch(SV::exception e) {
         printf("%s\n", e.what());
         conn.close();

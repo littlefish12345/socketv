@@ -18,7 +18,7 @@ int main() {
     sv.set_backlog(10);
 
     try {
-        listener = sv.listen(SV::udp, SV::address(SV::ipv4, "127.0.0.1", 11451));
+        listener = sv.listen(SV::udp, SV::address(SV::ipv6, "::1", 11451));
     } catch(SV::exception e) {
         printf("%s\n", e.what());
         listener.close();
